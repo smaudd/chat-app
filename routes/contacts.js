@@ -10,7 +10,7 @@ const socket = io(process.env.BASE_URL + '/notifications', {
 })
 
 const isConnected = () => {
-    return socket !== null ? true : false
+    console.log(socket)
 }
 
 router.get('/read', async (req, res, next) => {
