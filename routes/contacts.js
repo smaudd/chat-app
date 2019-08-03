@@ -9,6 +9,10 @@ const socket = io(process.env.BASE_URL + '/notifications', {
     }
 })
 
+const isConnected = () => {
+    return socket !== null ? true : false
+}
+
 router.get('/read', async (req, res, next) => {
     const token = jwt.decode(req.headers.authorization, process.env.SECRET)
     if (!token) {
@@ -57,7 +61,7 @@ router.post('/add', async (req, res, next) => {
             to: contact._id,
             code: 38
         }
-        console.log('A punto de emitir')
+        console.log('Server client', isConnected)
         socket.emit('notification', notification)
         res.status(200).send({ msg: 'Contact added' })
     } catch (err) {
