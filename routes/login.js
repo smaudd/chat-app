@@ -5,11 +5,11 @@ const User = require('../model/User.model')
 const uuid4 = require('uuid/v4')
 
 router.post('/', async (req, res, next) => {
-    const { email, password } = req.body
+    const { email, password, player_id } = req.body
     try {
         const user = await User.findOneAndUpdate(
             { email }, 
-            { signature: await uuid4(), status: true },
+            { signature: await uuid4(), status: true, player_id },
             { new: true }
         )
         if (user) {

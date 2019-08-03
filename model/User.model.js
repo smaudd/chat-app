@@ -36,6 +36,9 @@ const UserSchema = new mongoose.Schema(
             type: Boolean,
             default: true  
         },
+        player_id: {
+            type: String,
+        },
         contacts: [ContactSchema]
     }, 
     { 

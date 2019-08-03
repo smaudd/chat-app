@@ -2,6 +2,7 @@ const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const User = require('../model/User.model')
 const io = require('socket.io-client')
+const OneSignal = require('../lib/OneSignal')
 
 const socket = io(process.env.BASE_URL + '/notifications', {
     query: {
@@ -49,7 +50,7 @@ router.post('/add', async (req, res, next) => {
         if (!contact) {
             return res.status(404).send({ msg: 'User not found'})
         }
-        const { _id } = contact
+        const { _id, player_id } = contact
         const status = false
         await User.findByIdAndUpdate(
             token._id,
@@ -61,8 +62,7 @@ router.post('/add', async (req, res, next) => {
             to: contact._id,
             code: 38
         }
-        console.log('Server client', isConnected())
-        socket.emit('notification', notification)
+        await OneSignal.newNotification(notification, player_id)
         res.status(200).send({ msg: 'Contact added' })
     } catch (err) {
         console.log(err)
