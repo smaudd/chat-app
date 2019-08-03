@@ -61,7 +61,7 @@ router.post('/add', async (req, res, next) => {
             to: contact._id,
             code: 38
         }
-        console.log('Server client', isConnected)
+        console.log('Server client', isConnected())
         socket.emit('notification', notification)
         res.status(200).send({ msg: 'Contact added' })
     } catch (err) {
