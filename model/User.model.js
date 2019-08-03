@@ -1,6 +1,21 @@
 const mongoose = require('mongoose');
 
-const UserSchema = new mongoose.Schema({
+const ContactSchema = new mongoose.Schema(
+    {
+        status: {
+            type: Boolean
+        },
+        _id: {
+            type: String
+        },
+        nickname: {
+            type: String
+        }
+}
+)
+
+const UserSchema = new mongoose.Schema(
+    {
         email: {
             type: String,
             index: true
@@ -16,7 +31,12 @@ const UserSchema = new mongoose.Schema({
         signature: {
             type: String,
             required: true
-        }
+        },
+        state: {
+            type: Boolean,
+            default: true  
+        },
+        contacts: [ContactSchema]
     }, 
     { 
         timestamps: true 

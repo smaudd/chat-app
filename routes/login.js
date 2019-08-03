@@ -9,13 +9,18 @@ router.post('/', async (req, res, next) => {
     try {
         const user = await User.findOneAndUpdate(
             { email }, 
-            { signature: await uuid4() },
+            { signature: await uuid4(), status: true },
             { new: true }
         )
         if (user) {
             await pwdVerify(password, user.password)
             const token = await getToken(user)
-            return res.status(200).send({ token })
+            return res.status(200).send({ 
+                msg: 'Login successfully', 
+                token,
+                _id: user._id,
+                contacts: user.contacts
+            })
         } else {
             errorHandler('Invalid Credentials', res)
         }
