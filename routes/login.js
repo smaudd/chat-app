@@ -6,6 +6,7 @@ const uuid4 = require('uuid/v4')
 
 router.post('/', async (req, res, next) => {
     const { email, password, player_id } = req.body
+    console.log(player_id)
     try {
         const user = await User.findOneAndUpdate(
             { email }, 
