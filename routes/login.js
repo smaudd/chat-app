@@ -25,6 +25,7 @@ router.post('/', async (req, res, next) => {
             errorHandler('Invalid Credentials', res)
         }
     } catch (err) {
+        console.log(err)
         errorHandler(err, res)
     }
 })

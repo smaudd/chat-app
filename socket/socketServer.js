@@ -28,6 +28,7 @@ module.exports.listen = app => {
     })
 
     notifications.use(async (socket, next) => {
+      console.log('Socket connected')
       // Pendiente de borrar, solo permitido en test
       if (socket.handshake.query.token === 'GIMME') return next()
       if (socket.handshake.query && socket.handshake.query.token) {

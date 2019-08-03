@@ -57,6 +57,7 @@ router.post('/add', async (req, res, next) => {
             to: contact._id,
             code: 38
         }
+        console.log('A punto de emitir')
         socket.emit('notification', notification)
         res.status(200).send({ msg: 'Contact added' })
     } catch (err) {

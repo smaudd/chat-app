@@ -36,6 +36,7 @@ exports.notificationsHandler = (socket, notifications) => {
     })
 
     socket.on('notification', async (data) => {
+        console.log(data)
         const { 
             to, 
             body, 
