@@ -6,10 +6,16 @@ const getToken = require('../lib/token')
 const uuid4 = require('uuid/v4')
 
 router.post('/', async (req, res, next) => {
-    console.log(req.body)
+    const { 
+        email, 
+        password, 
+        nickname, 
+        contacts, 
+        player_id 
+    } = req.body
     try {
         const valid = await emailValidation(email, nickname)
-        const saved = await save(req.body)
+        const saved = await save(email, password, nickname, contacts, player_id)
         const token = await getToken(saved)
         res.status(200).send({ msg: 'User created', token: token, _id: saved._id })
     } catch (err) {
@@ -17,19 +23,12 @@ router.post('/', async (req, res, next) => {
     }
 })
 
-const save = async (body) => {
-    const { 
-        email, 
-        password, 
-        nickname, 
-        contacts, 
-        player_id 
-    } = body
+const save = async (email, password, nickname, contacts, player_id) => {
     return new Promise(async (resolve, reject) => {
         try {
             const saltyPwd = await pwdSalt(password)
             const user = new User({ 
-                email, 
+                email: email, 
                 nickname, 
                 password: saltyPwd,
                 signature: await uuid4(),
