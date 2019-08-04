@@ -51,7 +51,9 @@ router.post('/add', async (req, res, next) => {
             to: contact._id,
             code: 38
         }
-        await OneSignal.newNotification(notification, player_id)
+        console.log(player_id)
+        const result = await OneSignal.newNotification(notification, player_id)
+        console.log(result)
         res.status(200).send({ 
             msg: 'Contact added', 
             contact: {
