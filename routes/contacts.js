@@ -47,13 +47,10 @@ router.post('/add', async (req, res, next) => {
             { safe: true, upsert: true, new: true }
         )
         const notification = {
-            body: nickname,
-            to: contact._id,
-            code: 38
+            en: "HOLA"    
         }
-        console.log(player_id)
-        const result = await OneSignal.newNotification(notification, player_id)
-        console.log(result)
+        // console.log(player_id)
+        const result = await OneSignal.newNotification(notification, [player_id])
         res.status(200).send({ 
             msg: 'Contact added', 
             contact: {
@@ -63,7 +60,7 @@ router.post('/add', async (req, res, next) => {
             }
         })
     } catch (err) {
-        console.log(err)
+        // console.log(err)
         errorHandler(err, res)
     }
 })
