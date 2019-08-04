@@ -10,7 +10,7 @@ router.post('/', async (req, res, next) => {
     try {
         const user = await User.findOneAndUpdate(
             { email }, 
-            { signature: await uuid4(), status: true, player_id },
+            { signature: await uuid4(), state: true, player_id },
             { new: true }
         )
         if (user) {

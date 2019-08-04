@@ -63,7 +63,14 @@ router.post('/add', async (req, res, next) => {
             code: 38
         }
         await OneSignal.newNotification(notification, player_id)
-        res.status(200).send({ msg: 'Contact added' })
+        res.status(200).send({ 
+            msg: 'Contact added', 
+            contact: {
+                _id: contact_id,
+                nickname: nickname,
+                status: false
+            } 
+        })
     } catch (err) {
         console.log(err)
         errorHandler(err, res)

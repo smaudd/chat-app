@@ -6,6 +6,7 @@ const cors = require('cors')
 const path = require('path')
 const signup = require('./routes/signup')
 const login = require('./routes/login')
+const logout = require('./routes/logout')
 const contacts = require('./routes/contacts')
 const socketServer = require('./socket/socketServer')
 const app = express()
@@ -20,6 +21,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.json());
 app.use('/signup', signup)
 app.use('/login', login)
+app.use('/logout', logout)
 app.use('/contacts', contacts)
 
 mongoose.connect(

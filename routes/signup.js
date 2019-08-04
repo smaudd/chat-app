@@ -5,7 +5,7 @@ const pwdSalt = require('../lib/pwdSalt')
 const getToken = require('../lib/token')
 const uuid4 = require('uuid/v4')
 
-router.post('/', async (req, res, next) => {
+router.post('/', async (req, res) => {
     const { 
         email, 
         password, 
@@ -17,7 +17,12 @@ router.post('/', async (req, res, next) => {
         const valid = await emailValidation(email, nickname)
         const saved = await save(email, password, nickname, contacts, player_id)
         const token = await getToken(saved)
-        res.status(200).send({ msg: 'User created', token: token, _id: saved._id })
+        res.status(200).send({ 
+            msg: 'User created', 
+            token: token, 
+            _id: saved._id, 
+            contacts: saved.contacts 
+        })
     } catch (err) {
         errorHandler(err, res)
     }
