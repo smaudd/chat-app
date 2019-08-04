@@ -1,18 +1,7 @@
 const router = require('express').Router()
 const jwt = require('jsonwebtoken')
 const User = require('../model/User.model')
-const io = require('socket.io-client')
 const OneSignal = require('../lib/OneSignal')
-
-const socket = io(process.env.BASE_URL + '/notifications', {
-    query: {
-        token: 'GIMME'
-    }
-})
-
-const isConnected = () => {
-    console.log(socket)
-}
 
 router.get('/read', async (req, res, next) => {
     const token = jwt.decode(req.headers.authorization, process.env.SECRET)
@@ -66,10 +55,10 @@ router.post('/add', async (req, res, next) => {
         res.status(200).send({ 
             msg: 'Contact added', 
             contact: {
-                _id: contact_id,
-                nickname: nickname,
+                _id: contact._id,
+                nickname: contact.nickname,
                 status: false
-            } 
+            }
         })
     } catch (err) {
         console.log(err)
