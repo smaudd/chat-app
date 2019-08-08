@@ -109,8 +109,8 @@ router.post('/accept', async (req, res) => {
             { safe: true, upsert: true, new: true }
         )
         res.status(200).send({ 
-            nickname: user1.nickname, 
-            contactId: user1._id,
+            nickname: user1 ? user1.nickname : user2.nickname, 
+            contactId: user1 ? user1._id : user2._id,
             status: true
         })
         const notification = {
