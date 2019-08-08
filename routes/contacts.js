@@ -85,7 +85,6 @@ router.put('/delete', async (req, res, next) => {
 })
 
 router.post('/accept', async (req, res, next) => {
-    console.log('ACCEPT TOUCHEDZX')
     const { _id } = res.locals.user
     const { contactId } = req.body
     const status = true
@@ -102,7 +101,10 @@ router.post('/accept', async (req, res, next) => {
             { $addToSet: { contacts: { _id, status } } },
             { safe: true, upsert: true, new: true }
         )
-        res.status(200).send({ contactId: user2._id })
+        res.status(200).send({ 
+            nickanem: user2.nickname, 
+            contactId: user2._id 
+        })
     } catch (err) {
         if (err.errmsg === 'The positional operator did not find the match needed from the query.') {
             res.status(404).send({ msg: 'Contact not found' })
