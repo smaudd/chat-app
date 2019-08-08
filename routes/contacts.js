@@ -1,15 +1,9 @@
 const router = require('express').Router()
-const jwt = require('jsonwebtoken')
 const User = require('../model/User.model')
-const OneSignal = require('../lib/OneSignal')
+const { newNotification } = require('../lib/OneSignal')
 
 router.get('/read', async (req, res, next) => {
-    const token = jwt.decode(req.headers.authorization, process.env.SECRET)
-    if (!token) {
-        console.log(token)
-        return res.status(401).send({ msg: 'Invalid token' })
-    }
-    const { _id } = token
+    const { _id } = req.user.locals
     try {
         const _ids = await User.findOne({ _id }, { contacts: 1, status: 1, nickname: 1 })
         res.status(200).send({ msg: 'Contacts found', contacts: _ids.contacts })
@@ -23,7 +17,10 @@ router.get('/find', async (req, res, next) => {
     const { nickname } = req.query
     const exp = new RegExp(`^${nickname}`, 'gi')
     try {
-        const users = await User.find({ nickname: exp }, { nickname: 1, _id: 1 })
+        const users = await User.find(
+            { nickname: exp }, 
+            { nickname: 1, _id: 1 }
+        )
         res.status(200).send(users)
     } catch (err) {
         console.log(err)
@@ -32,27 +29,33 @@ router.get('/find', async (req, res, next) => {
 })
 
 router.post('/add', async (req, res, next) => {
-    const token = jwt.decode(req.headers.authorization, process.env.SECRET)
+    const { _id } = res.locals.user
     const { nickname } = req.body
     try {
         const contact = await User.findOne({ nickname })
         if (!contact) {
             return res.status(404).send({ msg: 'User not found'})
         }
-        const { _id, player_id } = contact
+        const { contact_id, player_id } = contact
         const status = false
-        await User.findByIdAndUpdate(
-            token._id,
-            { $addToSet: { contacts: { _id, nickname, status } } },
+        const user = await User.findByIdAndUpdate(
+            _id,
+            { $addToSet: { contacts: { contact_id, nickname, status } } },
             { safe: true, upsert: true, new: true }
         )
         const notification = {
-            en: "HOLA"    
+            contents: {
+                en: `${user.nickname} wants to be part of your friends`
+            },
+            data: {
+                contactId: _id,
+                date: new Date()
+            },
+            player_ids: [player_id]
         }
-        // console.log(player_id)
-        const result = await OneSignal.newNotification(notification, [player_id])
+        await newNotification(notification)
         res.status(200).send({ 
-            msg: 'Contact added', 
+            msg: 'Contact added. Waiting for acceptance.', 
             contact: {
                 _id: contact._id,
                 nickname: contact.nickname,
@@ -60,18 +63,18 @@ router.post('/add', async (req, res, next) => {
             }
         })
     } catch (err) {
-        // console.log(err)
+        console.log(err)
         errorHandler(err, res)
     }
 })
 
 router.put('/delete', async (req, res, next) => {
-    const token = jwt.decode(req.headers.authorization, process.env.SECRET)
-    const { _id } = req.body
+    const { _id } = res.locals.user
+    const contact_id = req.body._id
     try {
         await User.findByIdAndUpdate(
-            token._id,
-            { $pull: { contacts: { _id } } },
+            _id,
+            { $pull: { contacts: { contact_id } } },
             { safe: true, upsert: true, new: true }
         )
         res.status(200).send({ msg: 'Contact deleted' })
@@ -82,23 +85,23 @@ router.put('/delete', async (req, res, next) => {
 })
 
 router.put('/accept', async (req, res, next) => {
-    const token = jwt.decode(req.headers.authorization, process.env.SECRET)
-    const { _id } = req.body
+    const { _id } = res.locals.user
+    const { contactId } = req.body
     const status = true
     try {
         const user1 = await User.findOneAndUpdate(
-            { _id: token._id, "contacts._id": _id }, 
+            { _id, "contacts._id": contactId }, 
             { 
                 $set: { "contacts.$.status": status },
             },
             { safe: true, upsert: true, new: true }
         )
-        await User.findByIdAndUpdate(
-            _id,
-            { $addToSet: { contacts: { _id: token._id, status } } },
+        const user2 = await User.findByIdAndUpdate(
+            contactId,
+            { $addToSet: { contacts: { _id, status } } },
             { safe: true, upsert: true, new: true }
         )
-        res.status(200).send(user1)
+        res.status(200).send({ contactId: user2._id })
     } catch (err) {
         if (err.errmsg === 'The positional operator did not find the match needed from the query.') {
             res.status(404).send({ msg: 'Contact not found' })
