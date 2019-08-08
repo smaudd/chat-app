@@ -102,7 +102,7 @@ router.post('/accept', async (req, res, next) => {
             { safe: true, upsert: true, new: true }
         )
         res.status(200).send({ 
-            nickanem: user2.nickname, 
+            nickname: user2.nickname, 
             contactId: user2._id 
         })
     } catch (err) {
