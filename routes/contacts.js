@@ -116,6 +116,7 @@ router.post('/accept', async (req, res) => {
                     nickname: user1.nickname,
                     status: true,
                 },
+                code: 31,
                 date: new Date()
             },
             player_ids: [user1.player_id]
