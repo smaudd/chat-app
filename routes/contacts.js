@@ -40,9 +40,10 @@ router.post('/add', async (req, res, next) => {
         const status = false
         const user = await User.findByIdAndUpdate(
             _id,
-            { $addToSet: { contacts: { contact_id, nickname, status } } },
+            { $addToSet: { contacts: { _id: contact_id, nickname, status } } },
             { safe: true, upsert: true, new: true }
         )
+
         const notification = {
             contents: {
                 en: `${user.nickname} wants to be part of your friends`
