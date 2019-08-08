@@ -85,6 +85,7 @@ router.put('/delete', async (req, res, next) => {
 })
 
 router.put('/accept', async (req, res, next) => {
+    console.log('ACCEPT TOUCHED')
     const { _id } = res.locals.user
     const { contactId } = req.body
     const status = true
@@ -111,6 +112,7 @@ router.put('/accept', async (req, res, next) => {
 })
 
 const errorHandler = (err, res) =>  {
+    console.log(err)
     res.status(502).send({ msg: 'Problems with the server'})
 }
 
