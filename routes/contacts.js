@@ -50,7 +50,8 @@ router.post('/add', async (req, res, next) => {
             },
             data: {
                 contactId: _id,
-                date: new Date()
+                date: new Date(),
+                code: 38
             },
             player_ids: [player_id]
         }
