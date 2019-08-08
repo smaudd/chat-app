@@ -112,12 +112,12 @@ router.post('/accept', async (req, res) => {
         })
         const notification = {
             contents: {
-                en: `${user1.nickname} accepted your invitation.`
+                en: `${user2.nickname} accepted your invitation.`
             },
             data: {
                 contact: {
-                    contactId: user1._id,
-                    nickname: user1.nickname,
+                    contactId: user2._id,
+                    nickname: user2.nickname,
                     status: true,
                 },
                 code: 31,
