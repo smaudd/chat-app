@@ -86,7 +86,7 @@ router.put('/delete', async (req, res, next) => {
 })
 
 router.post('/accept', async (req, res) => {
-    const { _id } = res.locals.user
+    const { _id, nickname } = res.locals.user
     const { contactId } = req.body
     const status = true
     try {
@@ -99,7 +99,7 @@ router.post('/accept', async (req, res) => {
         )
         const user2 = await User.findByIdAndUpdate(
             contactId,
-            { $addToSet: { contacts: { _id, status } } },
+            { $addToSet: { contacts: { _id, nickname, status } } },
             { safe: true, upsert: true, new: true }
         )
         res.status(200).send({ 
