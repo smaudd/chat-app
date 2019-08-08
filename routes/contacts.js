@@ -84,7 +84,7 @@ router.put('/delete', async (req, res, next) => {
     }
 })
 
-router.post('/accept', async (req, res, next) => {
+router.post('/accept', async (req, res) => {
     const { _id } = res.locals.user
     const { contactId } = req.body
     const status = true
@@ -106,6 +106,21 @@ router.post('/accept', async (req, res, next) => {
             contactId: user2._id,
             status: true
         })
+        const notification = {
+            contents: {
+                en: `${user1.nickname} accepted your invitation.`
+            },
+            data: {
+                contact: {
+                    contactId: user1._id,
+                    nickname: user1.nickname,
+                    status: true,
+                },
+                date: new Date()
+            },
+            player_ids: [user1.player_id]
+        }
+        await newNotification(notification)
     } catch (err) {
         if (err.errmsg === 'The positional operator did not find the match needed from the query.') {
             res.status(404).send({ msg: 'Contact not found' })
