@@ -86,25 +86,28 @@ router.put('/delete', async (req, res, next) => {
 })
 
 router.post('/accept', async (req, res) => {
+    // ACEPTA EL QUE RECIBE LA NOTIFICACION
     const { _id, nickname } = res.locals.user
     const { contactId } = req.body
     const status = true
     try {
+        // The one who sent the invitation
         const user1 = await User.findOneAndUpdate(
-            { _id, "contacts._id": contactId }, 
+            { _id: contactId, "contacts._id": _id }, 
             { 
                 $set: { "contacts.$.status": status },
             },
             { safe: true, upsert: true, new: true }
         )
+        // The one who's accepting the invitation
         const user2 = await User.findByIdAndUpdate(
-            contactId,
-            { $addToSet: { contacts: { _id, nickname, status } } },
+            _id,
+            { $addToSet: { contacts: { _id: user1._id, nickname: user1.nickname, status } } },
             { safe: true, upsert: true, new: true }
         )
         res.status(200).send({ 
-            nickname: user2.nickname, 
-            contactId: user2._id,
+            nickname: user1.nickname, 
+            contactId: user1._id,
             status: true
         })
         const notification = {
