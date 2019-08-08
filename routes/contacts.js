@@ -103,7 +103,8 @@ router.post('/accept', async (req, res, next) => {
         )
         res.status(200).send({ 
             nickname: user2.nickname, 
-            contactId: user2._id 
+            contactId: user2._id,
+            status: true
         })
     } catch (err) {
         if (err.errmsg === 'The positional operator did not find the match needed from the query.') {
