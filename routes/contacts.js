@@ -36,7 +36,7 @@ router.post('/add', async (req, res, next) => {
         if (!contact) {
             return res.status(404).send({ msg: 'User not found'})
         }
-        const { contact_id, player_id } = contact
+        const { _id: contact_id, player_id } = contact
         const status = false
         const user = await User.findByIdAndUpdate(
             _id,
