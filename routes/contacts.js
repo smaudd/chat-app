@@ -85,7 +85,7 @@ router.put('/delete', async (req, res, next) => {
 })
 
 router.post('/accept', async (req, res, next) => {
-    console.log('ACCEPT TOUCHED')
+    console.log('ACCEPT TOUCHEDZX')
     const { _id } = res.locals.user
     const { contactId } = req.body
     const status = true
