@@ -93,13 +93,15 @@ router.post('/accept', async (req, res) => {
     const status = true
     try {
         // The one who sent the invitation
-        const user1 = await User.findOneAndUpdate(
-            { _id: contactId, "contacts._id": _id }, 
-            { 
-                $set: { "contacts.$.status": status },
-            },
-            { safe: true, upsert: true, new: true }
-        )
+        if (_id !== contactId) {
+            const user1 = await User.findOneAndUpdate(
+                { _id: contactId, "contacts._id": _id }, 
+                { 
+                    $set: { "contacts.$.status": status },
+                },
+                { safe: true, upsert: true, new: true }
+            )
+        }
         // The one who's accepting the invitation
         const user2 = await User.findByIdAndUpdate(
             _id,
@@ -124,7 +126,7 @@ router.post('/accept', async (req, res) => {
                 code: 31,
                 date: new Date()
             },
-            player_ids: [user1.player_id]
+            player_ids: [user1 ? user1.player_id : user2.player_id]
         }
         await newNotification(notification)
     } catch (err) {
