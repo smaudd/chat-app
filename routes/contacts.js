@@ -14,6 +14,7 @@ router.get('/read', async (req, res, next) => {
 })
 
 router.get('/find', async (req, res, next) => {
+    const { _id } = req.locals.user;
     const { nickname } = req.query
     const exp = new RegExp(`^${nickname}`, 'gi')
     try {
@@ -21,14 +22,16 @@ router.get('/find', async (req, res, next) => {
             { nickname: exp }, 
             { nickname: 1, _id: 1 }
         )
-        res.status(200).send(users)
+        // Take out the one who's looking
+        const filtered = users.filter(user => user._id === _id);
+        res.status(200).send(filtered)
     } catch (err) {
         console.log(err)
         errorHandler(err, res)
     }
 })
 
-router.post('/add', async (req, res, next) => {
+router.post('/add', async (req, res) => {
     const { _id } = res.locals.user
     const { nickname } = req.body
     try {
@@ -70,7 +73,7 @@ router.post('/add', async (req, res, next) => {
     }
 })
 
-router.put('/delete', async (req, res, next) => {
+router.put('/delete', async (req, res) => {
     const { _id } = res.locals.user
     const contact_id = req.body._id
     try {
@@ -87,21 +90,18 @@ router.put('/delete', async (req, res, next) => {
 })
 
 router.post('/accept', async (req, res) => {
-    // ACEPTA EL QUE RECIBE LA NOTIFICACION
-    const { _id, nickname } = res.locals.user
+    const { _id } = res.locals.user
     const { contactId } = req.body
     const status = true
     try {
         // The one who sent the invitation
-        if (_id !== contactId) {
-            const user1 = await User.findOneAndUpdate(
-                { _id: contactId, "contacts._id": _id }, 
-                { 
-                    $set: { "contacts.$.status": status },
-                },
-                { safe: true, upsert: true, new: true }
-            )
-        }
+        const user1 = await User.findOneAndUpdate(
+            { _id: contactId, "contacts._id": _id }, 
+            { 
+                $set: { "contacts.$.status": status },
+            },
+            { safe: true, upsert: true, new: true }
+        )
         // The one who's accepting the invitation
         const user2 = await User.findByIdAndUpdate(
             _id,
@@ -109,8 +109,8 @@ router.post('/accept', async (req, res) => {
             { safe: true, upsert: true, new: true }
         )
         res.status(200).send({ 
-            nickname: user1 ? user1.nickname : user2.nickname, 
-            contactId: user1 ? user1._id : user2._id,
+            nickname: user1.nickname,
+            contactId: user1._id,
             status: true
         })
         const notification = {
@@ -126,12 +126,12 @@ router.post('/accept', async (req, res) => {
                 code: 31,
                 date: new Date()
             },
-            player_ids: [user1 ? user1.player_id : user2.player_id]
+            player_ids: [user1.player_id]
         }
         await newNotification(notification)
     } catch (err) {
         if (err.errmsg === 'The positional operator did not find the match needed from the query.') {
-            res.status(404).send({ msg: 'Contact not found' })
+            res.status(404).send({ msg: 'Imposible to accept an unexistent invitation.' })
         }
         errorHandler(err, res)
     }
