@@ -141,7 +141,7 @@ router.post('/deny', async (req, res) => {
     const { contactId } = req.body
     try {
         const deniedUser = await User.findByIdAndUpdate(
-            _id,
+            contactId,
             { $pull: { contacts: { contactId } } },
             { safe: true, upsert: true, new: true }
         )
