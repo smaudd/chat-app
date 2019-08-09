@@ -14,7 +14,7 @@ router.get('/read', async (req, res, next) => {
 })
 
 router.get('/find', async (req, res, next) => {
-    const { _id } = req.locals.user;
+    const { _id } = res.locals.user;
     const { nickname } = req.query
     const exp = new RegExp(`^${nickname}`, 'gi')
     try {
