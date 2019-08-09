@@ -1,8 +1,6 @@
 const User = require('../model/User.model')
 const Chat = require('../model/Chat.model')
 const Message = require('../model/Message.model')
-const Notification = require('../model/Notification.model')
-
 
 exports.chatsHandler = (socket, chats) => {
     socket.on('openChat', async (data) => {
@@ -26,29 +24,6 @@ exports.chatsHandler = (socket, chats) => {
         })
         await message.save()
         chats.to(chat_id).emit('message', data.body)
-    })
-}
-
-exports.notificationsHandler = (socket, notifications) => {
-    socket.on('openNotifications', (data) => {
-        socket.join(data._id)
-        notifications.to(data._id).emit('channelInfo', data._id)
-    })
-
-    socket.on('notification', async (data) => {
-        console.log(data)
-        const { 
-            to, 
-            body, 
-            code, 
-        } = data
-        const notification = new Notification({
-            to,
-            body,
-            code,
-        })
-        console.log(to)
-        notifications.to(data.to).emit('pushNotification', notification)
     })
 }
 

@@ -7,7 +7,6 @@ module.exports.listen = app => {
     const server = http.Server(app)
     const socketServer = io(server, { origins: '*:*' })
     const chats = socketServer.of('/chats')
-    const notifications = socketServer.of('/notifications')
 
     chats.use(async (socket, next) => {
       // Pendiente de borrar, solo permitido en test
@@ -25,25 +24,6 @@ module.exports.listen = app => {
     })
     .on('connection', (socket) => {
       chatsHandler(socket, chats)
-    })
-
-    notifications.use(async (socket, next) => {
-      console.log('Socket connected')
-      // Pendiente de borrar, solo permitido en test
-      if (socket.handshake.query.token === 'GIMME') return next()
-      if (socket.handshake.query && socket.handshake.query.token) {
-        try {
-          const user = await tokenValidation(socket.handshake.query.token)
-          next(user)
-        } catch (err) {
-          console.log('Auth invalid')
-          return next(new Error(err))
-        }
-      }
-      next(new Error('Token needed'))
-    })
-    .on('connection', (socket) => {
-      notificationsHandler(socket, notifications)
     })
 
     server.listen(process.env.PORT, () => {

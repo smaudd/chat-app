@@ -13,18 +13,17 @@ router.get('/read', async (req, res, next) => {
     } 
 })
 
-router.get('/find', async (req, res, next) => {
-    const { _id } = res.locals.user;
+router.get('/find', async (req, res) => {
+    const _id = res.locals.user._id;
     const { nickname } = req.query
     const exp = new RegExp(`^${nickname}`, 'gi')
     try {
+        // Every user except the one whos asking
         const users = await User.find(
-            { nickname: exp }, 
+            { nickname: exp, _id: { $ne: _id } }, 
             { nickname: 1, _id: 1 }
         )
-        // Take out the one who's looking
-        const filtered = users.filter(user => user._id === _id);
-        res.status(200).send(filtered)
+        res.status(200).send(users)
     } catch (err) {
         console.log(err)
         errorHandler(err, res)
@@ -75,11 +74,11 @@ router.post('/add', async (req, res) => {
 
 router.put('/delete', async (req, res) => {
     const { _id } = res.locals.user
-    const contact_id = req.body._id
+    const { contactId } = req.body
     try {
         await User.findByIdAndUpdate(
             _id,
-            { $pull: { contacts: { contact_id } } },
+            { $pull: { contacts: { contactId } } },
             { safe: true, upsert: true, new: true }
         )
         res.status(200).send({ msg: 'Contact deleted' })
@@ -137,9 +136,40 @@ router.post('/accept', async (req, res) => {
     }
 })
 
+router.post('/deny', async (req, res) => {
+    const { _id, nickname } = res.locals.user
+    const { contactId } = req.body
+    try {
+        const deniedUser = await User.findByIdAndUpdate(
+            _id,
+            { $pull: { contacts: { contactId } } },
+            { safe: true, upsert: true, new: true }
+        )
+        const notification = {
+            contents: {
+                en: `${nickname} denied your invitation.`
+            },
+            data: {
+                contact: {
+                    contactId: _id,
+                    nickname: nickname,
+                    status: false,
+                },
+                code: 33,
+                date: new Date()
+            },
+            player_ids: [deniedUser.player_id]
+        }
+        await newNotification(notification);
+        res.status(200).send({ msg: 'Invitation succefully denied.' })
+    } catch (err) {
+        errorHandler(err, res);
+    }
+})
+
 const errorHandler = (err, res) =>  {
     console.log(err)
-    res.status(502).send({ msg: 'Problems with the server'})
+    res.status(502).send({ msg: 'Problems with the server.'})
 }
 
 module.exports = router
