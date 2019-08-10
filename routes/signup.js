@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
             msg: 'User created', 
             token: token, 
             _id: saved._id, 
+            nickname: saved.nickname,
             contacts: saved.contacts 
         })
     } catch (err) {

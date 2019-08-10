@@ -19,6 +19,7 @@ router.post('/', async (req, res) => {
                 msg: 'Login successfully', 
                 token,
                 _id: user._id,
+                nickname: user.nickname,
                 contacts: user.contacts
             })
         } else {

@@ -4,48 +4,67 @@ const Message = require('../model/Message.model')
 
 exports.chatsHandler = (socket, chats) => {
     socket.on('openChat', async (data) => {
-        console.log(data)
         try {
-            console.log(data)
-            const result = await findChatU2U(data.participant2)
-            socket.join(result.chat._id)
-            chats.to(result.chat._id).emit('chatInfo', result.chat._id)
+            const result = await findChatU2U(data)
+            socket.join(result._id)
+            chats.to(result._id).emit('chatInfo', result)
         } catch (err) {
+            console.log(err)
             socket.emit('close', err)
             socket.disconnect()
         }
     })
     socket.on('message', async (data) => {
-        const { from, chat_id, body } = data
+        const { from, chatId, body } = data
         const message = new Message({
             body,
-            chat_id,
+            chatId,
             from
         })
-        await message.save()
-        chats.to(chat_id).emit('message', data.body)
+        try {
+            const chat = await Chat.findOneAndUpdate(
+                { _id: chatId },
+                { updatedAt: Date.now() }
+            )
+            const result = await message.save()
+            chats.to(chatId).emit('message', result)
+        } catch (err) {
+            console.log(err)
+        }
     })
 }
 
 const findChatU2U = (data) => {
     return new Promise(async (resolve, reject) => {
-        participant2 = data
+        const { users } = data
         try {
-            const contacts = await User.find({ contacts: participant2 }, { _id: 1 })
-            if (contacts.length === 0) reject('Participants are not contacts') 
+            // In case someone tries to open a chat between two users that are not contacts
+            const contact1 = await User.findOne(
+                { _id: users[0]._id, "contacts._id": users[1]._id },
+            )
+            const contact2 = await User.findOne(
+                { _id: users[1]._id, "contacts._id": users[0]._id },
+            )
+            if (contact1.length === 0 || contact2.length === 0) reject('Participants are not contacts')
             const chat = await Chat
                 .findOneAndUpdate(
-                    { users: [data.paticipant1, data.participant2] },
-                    { updatedAt: Date.now() },
+                    { users: [
+                        { nickname: contact1.nickname, _id: contact1._id },
+                        { nickname: contact2.nickname, _id: contact2._id }
+                    ]},
+                    { createdAt: Date.now() },
                     { 
                         new: true,
                         upsert: true 
                     }
                 )
             const messages = await Message
-                .find({ chat_id: chat.id })
-                .sort({ createdAt: -1 })
-            resolve({ chat, messages })
+                .find({ chatId: chat._id })
+                .sort({ createdAt: 1 })
+            resolve({
+                ...chat.toObject(),
+                messages
+            })
         } catch (err) {
             console.log(err)
             reject(err)
