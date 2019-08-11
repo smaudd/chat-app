@@ -48,11 +48,18 @@ const findChatU2U = (data) => {
             if (contact1.length === 0 || contact2.length === 0) reject('Participants are not contacts')
             const chat = await Chat
                 .findOneAndUpdate(
+                    { "users._id": [contact2._id, contact1._id] },     
                     { users: [
-                        { nickname: contact1.nickname, _id: contact1._id },
-                        { nickname: contact2.nickname, _id: contact2._id }
-                    ]},
-                    { createdAt: Date.now() },
+                                { 
+                                    nickname: contact1.nickname, 
+                                    _id: contact1._id,
+                                },
+                                { 
+                                    nickname: contact2.nickname, 
+                                    _id: contact2._id,
+                                }
+                            ]
+                    },
                     { 
                         new: true,
                         upsert: true 

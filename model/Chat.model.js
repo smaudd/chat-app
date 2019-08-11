@@ -12,16 +12,7 @@ const userSchema = new mongoose.Schema({
 })
 
 const ChatSchema = new mongoose.Schema({
-        users: [{
-            nickname: {
-                type: String,
-                required: true
-            },
-            _id: {
-                type: String,
-                required: true
-            }
-        }]
+        users: [userSchema],
     }, 
     { 
         timestamps: true 

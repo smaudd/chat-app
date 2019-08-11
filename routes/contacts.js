@@ -8,7 +8,6 @@ router.get('/read', async (req, res, next) => {
         const _ids = await User.findOne({ _id }, { contacts: 1, status: 1, nickname: 1 })
         res.status(200).send({ msg: 'Contacts found', contacts: _ids.contacts })
     } catch (err) {
-        console.log(err)
         errorHandler(err, res)
     } 
 })
@@ -25,7 +24,6 @@ router.get('/find', async (req, res) => {
         )
         res.status(200).send(users)
     } catch (err) {
-        console.log(err)
         errorHandler(err, res)
     }
 })
@@ -67,7 +65,6 @@ router.post('/add', async (req, res) => {
             }
         })
     } catch (err) {
-        console.log(err)
         errorHandler(err, res)
     }
 })
@@ -83,7 +80,6 @@ router.put('/delete', async (req, res) => {
         )
         res.status(200).send({ msg: 'Contact deleted' })
     } catch (err) {
-        console.log(err)
         errorHandler(err, res)
     }
 })
@@ -169,7 +165,7 @@ router.post('/deny', async (req, res) => {
 
 const errorHandler = (err, res) =>  {
     console.log(err)
-    res.status(502).send({ msg: 'Problems with the server.'})
+    res.status(503).send({ msg: 'Problems with the server.', err: err })
 }
 
 module.exports = router
