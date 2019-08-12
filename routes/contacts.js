@@ -123,7 +123,8 @@ router.post('/accept', async (req, res) => {
             },
             player_ids: [user1.player_id]
         }
-        await newNotification(notification)
+        const result = await newNotification(notification)
+        console.log(result);
     } catch (err) {
         if (err.errmsg === 'The positional operator did not find the match needed from the query.') {
             res.status(404).send({ msg: 'Imposible to accept an unexistent invitation.' })
