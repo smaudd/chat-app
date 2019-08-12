@@ -10,7 +10,7 @@ module.exports.listen = app => {
 
     chats.use(async (socket, next) => {
       // Pendiente de borrar, solo permitido en test
-      if (socket.handshake.query.token === 'GIMME') return next()
+      if (socket.handshake.query.token) return next()
       if (socket.handshake.query && socket.handshake.query.token) {
         try {
           const user = await tokenValidation(socket.handshake.query.token)

@@ -1,33 +1,39 @@
 const User = require('../model/User.model')
 const Chat = require('../model/Chat.model')
 const Message = require('../model/Message.model')
+const jwt = require('jsonwebtoken')
 
 exports.chatsHandler = (socket, chats) => {
-    socket.on('openChat', async (data) => {
-        try {
-            const result = await findChatU2U(data)
-            socket.join(result._id)
-            chats.to(result._id).emit('chatInfo', result)
-        } catch (err) {
-            console.log(err)
-            socket.emit('close', err)
-            socket.disconnect()
-        }
-    })
+    // const token = jwt.decode(socket.handshake.query.token, process.env.SECRET)
+    // console.log(token)
+    socket.join(socket.handshake.query.token)
+    // socket.on('openChat', async (data) => {
+    //     try {
+    //         const result = await findChatU2U(data)
+    //         socket.join(result._id)
+    //         chats.to(result._id).emit('chatInfo', result)
+    //     } catch (err) {
+    //         console.log(err)
+    //         socket.emit('close', err)
+    //         socket.disconnect()
+    //     }
+    // })
     socket.on('message', async (data) => {
-        const { from, chatId, body } = data
+        const { 
+            body,
+            from,
+            to
+        } = data
         const message = new Message({
             body,
-            chatId,
-            from
+            from,
+            to
         })
         try {
-            const chat = await Chat.findOneAndUpdate(
-                { _id: chatId },
-                { updatedAt: Date.now() }
-            )
             const result = await message.save()
-            chats.to(chatId).emit('message', result)
+            console.log(result)
+            chats.to(from._id).emit('message', result)
+            chats.to(to._id).emit('message', result)
         } catch (err) {
             console.log(err)
         }
@@ -39,9 +45,10 @@ const findChatU2U = (data) => {
         const { users } = data
         try {
             // In case someone tries to open a chat between two users that are not contacts
-            const contact1 = await User.findOne(
-                { _id: users[0]._id, "contacts._id": users[1]._id },
+            const contact1 = await User.find(
+                { _id: [users[0]._id, users[1]._id], "contacts._id": [users[1]._id, users[0]._id] },
             )
+            console.log(contact1)
             const contact2 = await User.findOne(
                 { _id: users[1]._id, "contacts._id": users[0]._id },
             )

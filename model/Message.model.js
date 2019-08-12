@@ -5,14 +5,14 @@ const MessageSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        chatId: {
-            type: String,
-            required: true
-        },
         from: {
             _id: String,
             nickname: String,
-        }
+        },
+        to: [{
+            _id: String,
+            nickname: String,
+        }]
     }, 
     { 
         timestamps: true 
