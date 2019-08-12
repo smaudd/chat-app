@@ -17,7 +17,7 @@ exports.chatsHandler = (socket, chats) => {
             const result = await message.save()
             console.log(result)
             chats.to(from._id).emit('message', result)
-            messages.to.forEach(recipient => {
+            message.to.forEach(recipient => {
                 chats.to(recipient._id).emit('message', result);
             })
         } catch (err) {
